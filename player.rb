@@ -8,9 +8,7 @@ class Player
   end
 
   def add_card_to_hand(card)
-    puts "adding card: #{card.rank}#{card.suit}"
-    @hand << card
-    @hand.uniq! { |c| c.rank.to_s + c.suit }
+    @hand.unshift card
   end
 
   def add_cards_to_hand(cards)
@@ -21,5 +19,9 @@ class Player
 
   def play_card
     @hand.pop
+  end
+
+  def out_of_cards?
+    @hand.empty?
   end
 end

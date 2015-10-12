@@ -21,7 +21,15 @@ class PlayingCard
   ACE = 14
 
   def initialize(rank: rank, suit: suit)
-    @suit = suit
     @rank = rank
+    @suit = suit
+  end
+
+  def ==(other)
+    @rank == other.rank && @suit == other.suit
+  end
+
+  def eql?(other)
+    self == other
   end
 end

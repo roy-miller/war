@@ -74,5 +74,10 @@ describe CardDeck do
       deck = CardDeck.new
       expect(deck.has_cards?).to be false
     end
+    it 'should answer true when the deck has cards' do
+      deck = CardDeck.new
+      deck.cards << PlayingCard.new('irrelevantsuit', 'irrelevantrank')
+      expect(deck.has_cards?).to be true
+    end
   end
 end

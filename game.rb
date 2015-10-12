@@ -19,43 +19,27 @@ class Game
     @players << Player.new('player2')
   end
 
-  def play_round
-    cards_played = {}
-    @players.each do |player|
-      cards_played[player] = []
-      cards_played[player] << player.play_card
-    end
+  def play_round(cards_played = [])
+    card1 = @players.first.play_card
+    card2 = @players.last.play_card
+    cards_played.push(card1, card2)
 
     winner = nil
-    if (cards_played.values.first.first.rank == cards_played.values.last.first.rank)
-      winner = nil
-    else
-      winner = cards_played.key(cards_played.values.max_by { |x| x.last.rank })
+    if card1.rank > card2.rank
+      winner = @players.first
+      winner.add_cards_to_hand(cards_played)
     end
-
-    puts "cards played = #{cards_played}"
-    while winner.nil?
-      winner = self.fight(cards_played)
+    if card2.rank > card1.rank
+      winner = @players.last
+      winner.add_cards_to_hand(cards_played)
     end
-
-    cards_played.values.each do |cards|
-      winner.add_cards_to_hand(cards)
-    end
-
-    winner
-  end
-
-  def fight(cards_played)
-    @players.each do |player|
-      cards_played[player] << player.play_card
-      cards_played[player] << player.play_card
-    end
-
-    winner = nil
-    if (cards_played.values.first.first.rank == cards_played.values.last.first.rank)
-      winner = nil
-    else
-      winner = cards_played.key(cards_played.values.max_by { |x| x.first.rank })
+    if card1.rank == card2.rank
+      war_card1 = @players.first.play_card
+      war_card2 = @players.last.play_card
+      cards_played.push(war_card1, war_card2)
+      while !winner
+        winner = self.play_round(cards_played)
+      end
     end
 
     winner

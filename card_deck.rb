@@ -25,4 +25,8 @@ class CardDeck
       end
     end
   end
+
+  def has_cards?
+    !@cards.empty?
+  end
 end

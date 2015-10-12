@@ -2,7 +2,8 @@ require 'spec_helper'
 
 describe CardDeck do
 
-  let(:full_deck) {
+  let(:deck) { CardDeck.new }
+  let(:full_deck) do
     deck = CardDeck.new
     suits = [PlayingCard::SPADE, PlayingCard::CLUB, PlayingCard::HEART, PlayingCard::DIAMOND]
     ranks = [PlayingCard::TWO, PlayingCard::THREE, PlayingCard::FOUR, PlayingCard::FIVE,
@@ -15,7 +16,7 @@ describe CardDeck do
       end
     end
     deck
-  }
+  end
 
   describe '#new' do
       it 'has no cards' do
@@ -26,7 +27,6 @@ describe CardDeck do
 
   describe '#add' do
     it 'adds a card' do
-      deck = CardDeck.new
       deck.add(PlayingCard.new(rank: 'rank', suit: 'suit'))
       expect(deck.cards.count).to eq 1
     end
@@ -34,18 +34,16 @@ describe CardDeck do
 
   describe '#remove' do
     it 'removes a card' do
-      deck = CardDeck.new
       card = PlayingCard.new(rank: 'rank', suit: 'suit')
       deck.cards << card
       deck.remove(card)
-      expect(deck.cards.count).to eq 0
+      expect(deck.cards).to be_empty
     end
   end
 
   # TODO what's a better way to test this?
   describe '#shuffle' do
     it 'shuffles cards' do
-      deck = CardDeck.new
       card1 = PlayingCard.new(rank: 'rank1', suit: 'suit1')
       card2 = PlayingCard.new(rank: 'rank2', suit: 'suit1')
       card3 = PlayingCard.new(rank: 'rank1', suit: 'suit2')
@@ -63,25 +61,28 @@ describe CardDeck do
   end
 
   describe '#deal' do
-    it 'deals correct number of cards to players when given card count and players' do
+    it 'deals requested number of cards to each player' do
       player1 = Player.new('player1')
       player2 = Player.new('player2')
 
       full_deck.deal(26, [player1, player2])
 
-      expect(full_deck.cards.count).to eq 0
+      expect(full_deck.cards).to be_empty
       expect(player1.hand.count).to eq 26
       expect(player2.hand.count).to eq 26
     end
   end
 
   describe '#has_cards?' do
-    it 'should answer false when deck is empty' do
-      deck = CardDeck.new
-      expect(deck.has_cards?).to be false
+    context 'when deck is empty' do
+      it 'should answer false' do
+        expect(deck.has_cards?).to be false
+      end
     end
-    it 'should answer true when the deck has cards' do
-      expect(full_deck.has_cards?).to be true
+    context 'when deck has cards' do
+      it 'should answer true when the deck has cards' do
+        expect(full_deck.has_cards?).to be true
+      end
     end
   end
 end

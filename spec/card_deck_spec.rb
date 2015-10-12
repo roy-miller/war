@@ -1,14 +1,14 @@
 require 'spec_helper'
 
 describe CardDeck do
-  describe ".new" do
+  describe "#new" do
       it "has no cards" do
         deck = CardDeck.new
         expect(deck.cards.count).to eq 0
       end
   end
 
-  describe ".add" do
+  describe "#add" do
     it "adds a card" do
       deck = CardDeck.new
       deck.add(PlayingCard.new('suit','rank'))
@@ -16,7 +16,7 @@ describe CardDeck do
     end
   end
 
-  describe ".remove" do
+  describe "#remove" do
     it "removes a card" do
       deck = CardDeck.new
       card = PlayingCard.new('suit','rank')
@@ -26,7 +26,7 @@ describe CardDeck do
     end
   end
 
-  describe ".shuffle" do
+  describe "#shuffle" do
     it "shuffles cards" do
       deck = CardDeck.new
       card1 = PlayingCard.new('suit1','rank1')
@@ -45,7 +45,7 @@ describe CardDeck do
     end
   end
 
-  describe ".deal" do
+  describe "#deal" do
     it "deals correct number of cards to players" do
       deck = CardDeck.new
       suits = [PlayingCard::SPADE, PlayingCard::CLUB, PlayingCard::HEART, PlayingCard::DIAMOND]
@@ -66,6 +66,13 @@ describe CardDeck do
       expect(deck.cards.count).to eq 0
       expect(player1.hand.count).to eq 26
       expect(player2.hand.count).to eq 26
+    end
+  end
+
+  describe '#has_cards?' do
+    it 'should answer false when deck is empty' do
+      deck = CardDeck.new
+      expect(deck.has_cards?).to be false
     end
   end
 end

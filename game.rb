@@ -33,8 +33,9 @@ class Game
       winner = cards_played.key(cards_played.values.max_by { |x| x.last.rank })
     end
 
-    if !winner
-      winner = self.fight_war(cards_played)
+    puts "cards played = #{cards_played}"
+    while winner.nil?
+      winner = self.fight(cards_played)
     end
 
     cards_played.values.each do |cards|
@@ -44,12 +45,11 @@ class Game
     winner
   end
 
-  def fight_war(cards_played)
+  def fight(cards_played)
     @players.each do |player|
       cards_played[player] << player.play_card
       cards_played[player] << player.play_card
     end
-    puts "checking winner: #{cards_played}"
 
     winner = nil
     if (cards_played.values.first.first.rank == cards_played.values.last.first.rank)
@@ -57,10 +57,6 @@ class Game
     else
       winner = cards_played.key(cards_played.values.max_by { |x| x.first.rank })
     end
-
-    # if !winner
-    #   self.fight_war(cards_played)
-    # end
 
     winner
   end

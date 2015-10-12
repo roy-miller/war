@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe(Game) do
-  describe('.new') do
+  describe('#new') do
     it 'creates a game with two players and a full deck' do
       game = Game.new
       expect(game.deck.cards.count).to eq 52
@@ -9,7 +9,7 @@ describe(Game) do
     end
   end
 
-  describe('.play_round') do
+  describe('#play_round') do
     it 'declares player1 the winner when its card rank is higher, adds cards to player1' do
       game = Game.new
       player1 = Player.new('player1')
@@ -27,7 +27,7 @@ describe(Game) do
     end
   end
 
-  describe('.play_round') do
+  describe('#play_round') do
     it 'declares player2 the winner when its card rank is higher, adds cards to player2' do
       game = Game.new
       player1 = Player.new('player1')
@@ -45,7 +45,7 @@ describe(Game) do
     end
   end
 
-  describe('.play_round') do
+  describe('#play_round') do
     it 'declares war when ranks are the same, adds cards to winner' do
       game = Game.new
       player1 = Player.new('player1')

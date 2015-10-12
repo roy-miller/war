@@ -11,7 +11,7 @@ class Game
             PlayingCard::ACE]
     suits.each do |suit|
       ranks.each do |rank|
-        @deck.add(PlayingCard.new(suit, rank))
+        @deck.add(PlayingCard.new(rank: rank, suit: suit))
       end
     end
     @players = []

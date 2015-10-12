@@ -20,7 +20,7 @@ class PlayingCard
   KING = 13
   ACE = 14
 
-  def initialize(suit, rank)
+  def initialize(rank: rank, suit: suit)
     @suit = suit
     @rank = rank
   end

@@ -11,7 +11,7 @@ describe CardDeck do
   describe "#add" do
     it "adds a card" do
       deck = CardDeck.new
-      deck.add(PlayingCard.new('suit','rank'))
+      deck.add(PlayingCard.new(rank: 'rank', suit: 'suit'))
       expect(deck.cards.count).to eq 1
     end
   end
@@ -19,7 +19,7 @@ describe CardDeck do
   describe "#remove" do
     it "removes a card" do
       deck = CardDeck.new
-      card = PlayingCard.new('suit','rank')
+      card = PlayingCard.new(rank: 'rank', suit: 'suit')
       deck.add(card)
       deck.remove(card)
       expect(deck.cards.count).to eq 0
@@ -29,10 +29,10 @@ describe CardDeck do
   describe "#shuffle" do
     it "shuffles cards" do
       deck = CardDeck.new
-      card1 = PlayingCard.new('suit1','rank1')
-      card2 = PlayingCard.new('suit1','rank2')
-      card3 = PlayingCard.new('suit2','rank1')
-      card4 = PlayingCard.new('suit2','rank2')
+      card1 = PlayingCard.new(rank: 'rank1', suit: 'suit1')
+      card2 = PlayingCard.new(rank: 'rank2', suit: 'suit1')
+      card3 = PlayingCard.new(rank: 'rank1', suit: 'suit2')
+      card4 = PlayingCard.new(rank: 'rank2', suit: 'suit2')
       deck.add(card1)
       deck.add(card2)
       deck.add(card3)
@@ -55,7 +55,7 @@ describe CardDeck do
               PlayingCard::ACE]
       suits.each do |suit|
         ranks.each do |rank|
-          deck.add(PlayingCard.new(suit, rank))
+          deck.add(PlayingCard.new(rank: rank, suit: suit))
         end
       end
       player1 = Player.new('player1')
@@ -76,7 +76,7 @@ describe CardDeck do
     end
     it 'should answer true when the deck has cards' do
       deck = CardDeck.new
-      deck.cards << PlayingCard.new('irrelevantsuit', 'irrelevantrank')
+      deck.cards << PlayingCard.new(rank: 'irrelevantrank', suit: 'irrelevantsuit')
       expect(deck.has_cards?).to be true
     end
   end

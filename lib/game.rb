@@ -4,16 +4,16 @@ class Game
 
   def initialize
     @deck = CardDeck.new
-    suits = [PlayingCard::SPADE, PlayingCard::CLUB, PlayingCard::HEART, PlayingCard::DIAMOND]
-    ranks = [PlayingCard::TWO, PlayingCard::THREE, PlayingCard::FOUR, PlayingCard::FIVE,
-            PlayingCard::SIX, PlayingCard::SEVEN, PlayingCard::EIGHT, PlayingCard::NINE,
-            PlayingCard::TEN, PlayingCard::JACK, PlayingCard::QUEEN, PlayingCard::KING,
-            PlayingCard::ACE]
-    suits.each do |suit|
-      ranks.each do |rank|
-        @deck.add(PlayingCard.new(rank: rank, suit: suit))
-      end
-    end
+    #suits = [PlayingCard::SPADE, PlayingCard::CLUB, PlayingCard::HEART, PlayingCard::DIAMOND]
+    #ranks = [PlayingCard::TWO, PlayingCard::THREE, PlayingCard::FOUR, PlayingCard::FIVE,
+    #        PlayingCard::SIX, PlayingCard::SEVEN, PlayingCard::EIGHT, PlayingCard::NINE,
+    #        PlayingCard::TEN, PlayingCard::JACK, PlayingCard::QUEEN, PlayingCard::KING,
+    #        PlayingCard::ACE]
+    #suits.each do |suit|
+    #  ranks.each do |rank|
+    #    @deck.add(PlayingCard.new(rank: rank, suit: suit))
+    #  end
+    #end
     @players = []
   end
 

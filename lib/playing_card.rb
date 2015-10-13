@@ -1,7 +1,6 @@
 class PlayingCard
   attr_accessor :suit, :rank
 
-  # TODO smarter way to do this?
   CLUB = 'C'
   SPADE = 'S'
   DIAMOND = 'D'

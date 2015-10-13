@@ -11,9 +11,10 @@ describe(Game) do
   let(:lower_rank_card) { PlayingCard.new(rank: PlayingCard::FOUR, suit: PlayingCard::HEART) }
 
   describe('#new') do
-    it 'creates a game with a full deck' do
+    it 'creates a game with an empty deck and no players' do
       game = Game.new
-      expect(game.deck.cards.count).to eq 52
+      expect(game.deck.cards).to be_empty
+      expect(game.players).to be_empty
     end
   end
 

@@ -85,4 +85,19 @@ describe CardDeck do
       end
     end
   end
+
+  describe '#card_count' do
+    context 'when deck is a full deck of playing cards' do
+      it 'should answer the number of cards' do
+        expect(full_deck.card_count).to eq 52
+      end
+    end
+    context 'after dealing cards' do
+      it 'should answer the number of cards remaining' do
+        player = Player.new('playername')
+        full_deck.deal(1, [player])
+        expect(full_deck.card_count).to eq 51
+      end
+    end
+  end
 end

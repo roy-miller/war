@@ -1,8 +1,11 @@
 class CardDeck
   attr_reader :cards
+  attr_accessor :ranks, :suits
 
   def initialize
     @cards = Array.new
+    @suits = ['C','S','H','D']
+    @ranks = ['1','2','3','4','5','6','7','8','9','10','J','Q','K']
   end
 
   def add(card)
@@ -30,5 +33,7 @@ class CardDeck
     !@cards.empty?
   end
 
-  #add number_of_cards, or "card_count"
+  def card_count
+    @cards.size
+  end
 end

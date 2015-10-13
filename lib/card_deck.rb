@@ -29,4 +29,6 @@ class CardDeck
   def has_cards?
     !@cards.empty?
   end
+
+  #add number_of_cards, or "card_count"
 end

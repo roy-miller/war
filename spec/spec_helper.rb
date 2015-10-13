@@ -1,4 +1,4 @@
-require_relative '../card_deck'
-require_relative '../playing_card'
-require_relative '../game'
-require_relative '../player'
+require 'card_deck'
+require 'playing_card'
+require 'game'
+require 'player'

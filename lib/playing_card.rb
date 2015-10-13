@@ -1,11 +1,11 @@
 class PlayingCard
-  attr_accessor :suit
-  attr_accessor :rank
+  attr_accessor :suit, :rank
 
-  CLUB = 'club'
-  SPADE = 'spade'
-  DIAMOND = 'diamond'
-  HEART = 'heart'
+  # TODO smarter way to do this?
+  CLUB = 'C'
+  SPADE = 'S'
+  DIAMOND = 'D'
+  HEART = 'H'
   TWO = 2
   THREE = 3
   FOUR = 4
@@ -20,7 +20,7 @@ class PlayingCard
   KING = 13
   ACE = 14
 
-  def initialize(rank: rank, suit: suit)
+  def initialize(rank:, suit:)
     @rank = rank
     @suit = suit
   end

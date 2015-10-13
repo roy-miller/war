@@ -15,8 +15,6 @@ class Game
       end
     end
     @players = []
-    @players << Player.new('player1')
-    @players << Player.new('player2')
   end
 
   def play_round(cards_played = [])

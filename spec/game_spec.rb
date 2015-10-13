@@ -1,15 +1,19 @@
 require 'spec_helper'
 
 describe(Game) do
-  let(:game) { Game.new }
+  let(:game) do
+    game = Game.new
+    game.players << Player.new('player1')
+    game.players << Player.new('player2')
+    game
+  end
   let(:higher_rank_card) { PlayingCard.new(rank: PlayingCard::QUEEN, suit: PlayingCard::SPADE) }
   let(:lower_rank_card) { PlayingCard.new(rank: PlayingCard::FOUR, suit: PlayingCard::HEART) }
 
   describe('#new') do
-    it 'creates a game with two players and a full deck' do
+    it 'creates a game with a full deck' do
       game = Game.new
       expect(game.deck.cards.count).to eq 52
-      expect(game.players.count).to eq 2
     end
   end
 

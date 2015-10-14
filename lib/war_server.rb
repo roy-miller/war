@@ -22,7 +22,7 @@ class WarServer
     #puts "in pair_players"
     client.puts 'Welcome to war! Connecting you with a partner ...'
     @pending_clients << client
-    if @pending_clients == 2
+    if @pending_clients.count == 2
       @clients << @pending_clients.shift
       @clients << @pending_clients.shift
       # play_game

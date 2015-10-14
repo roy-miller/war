@@ -21,25 +21,8 @@ describe WarServer do
   end
 
   after :each do
-    @server.socket.close
     @client_socket.close
-  end
-
-  describe '#pair_players' do
-    context 'not two players yet' do
-      it 'welcomes player, adds to pending clients, and does not start game' do
-        @server.pair_players(@client_socket)
-        @client.capture_output
-        expect(@client.output).to include "Welcome to war!"
-        expect(@server.pending_clients.count).to eq 1
-      end
-    end
-    context 'two players' do
-      it 'welcomes player, adds to clients, and starts game' do
-        @server.pair_players(@client_socket)
-        @client.capture_output
-      end
-    end
+    @server.socket.close
   end
 
   describe '#initialize' do
@@ -47,14 +30,36 @@ describe WarServer do
       server = WarServer.new(port: 2000)
       expect(server).to be_a WarServer
       expect(server.socket).to be_a TCPServer
+      server.socket.close
+    end
+  end
+
+  describe '#pair_players' do
+    context 'not two players yet' do
+      it 'welcomes player, adds to pending clients, and does not start game' do
+        @server.pair_players(@client_socket)
+        expect(@client.output).to include "Welcome to war!"
+        expect(@server.pending_clients.count).to eq 1
+      end
+    end
+    context 'two players' do
+      it 'welcomes player, adds to clients, empties pending clients, and starts game' do
+        @server.pair_players(@client_socket)
+        @server.socket.listen(5)
+        client2 = MockWarSocketClient.new
+        client2_connection = @server.socket.accept
+        @server.pair_players(client2_connection)
+        client2_connection.close
+        expect(@server.pending_clients.count).to eq 0
+        expect(@server.clients.count).to eq 2
+      end
     end
   end
 
   describe '#ask_for_name' do
     it 'prompts player for name' do
-      # server = WarServer.new
-      # response = capture_stdout { server.ask_for_name }
-      # expect(response).to eq "Enter your name:\n"
+      @server.ask_for_name(client: @client_socket)
+      expect(@client.output).to eq "Enter your name:\n"
     end
   end
 

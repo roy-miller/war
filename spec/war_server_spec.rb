@@ -100,14 +100,21 @@ describe WarServer do
 
     describe '#stop' do
       it 'stops the server, closes all connections, removes them' do
+        client2_socket = MockWarSocketClient.new.socket
         @server.pending_clients << @client_socket
+        @server.pending_clients << client2_socket
         @server.clients << @client_socket
-        expect(@server.pending_clients.count).to eq 1
-        expect(@server.clients.count).to eq 1
+        @server.clients << client2_socket
+        expect(@client_socket.closed?).to be false
+        expect(client2_socket.closed?).to be false
+        expect(@server.pending_clients.count).to eq 2
+        expect(@server.clients.count).to eq 2
         @server.stop
+        expect(@client_socket.closed?).to be true
+        expect(client2_socket.closed?).to be true
+        expect(@server.socket.closed?).to be true
         expect(@server.pending_clients.count).to eq 0
         expect(@server.clients.count).to eq 0
-        expect(@server.socket.closed?).to be true
       end
     end
 

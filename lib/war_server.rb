@@ -45,27 +45,22 @@ class WarServer
     # rescue IO::WaitReadable
     #   retry
     # end
+  end
 
-    # @pending_clients << client
-    # if @pending_clients.length == 2
-    #   player1_socket = @pending_clients.first
-    #   player1_socket = @pending_clients.last
-    #   @clients << @pending_clients.shift
-    #   @clients << @pending_clients.shift
-    #   play_game(player1_socket, player2_socket)
-    # end
+  def stop
+    @pending_clients.each { |client| stop_connection(client: client) }
+    @clients.each { |client| stop_connection(client: client) }
+    # connections = []
+    # @pending_clients.each { |client| connections << client }
+    # @clients.each { |client| connections << client }
+    # connections.each { |client| stop_connection(client: client) }
+    @socket.close unless @socket.closed?
   end
 
   def stop_connection(client:)
     @pending_clients.delete(client)
     @clients.delete(client)
     client.close unless client.closed?
-  end
-
-  def stop
-    @pending_clients.each { |client| stop_connection(client: client) }
-    @clients.each { |client| stop_connection(client: client) }
-    @socket.close unless @socket.closed?
   end
 
   def ask_for_name(client:)

@@ -21,8 +21,8 @@ describe WarServer do
   end
 
   after :each do
-    @client_socket.close
-    @server.socket.close
+    @client_socket.close unless @client_socket.closed?
+    @server.socket.close unless @server.socket.closed?
   end
 
   describe '#initialize' do
@@ -71,8 +71,55 @@ describe WarServer do
     end
   end
 
-  # describe '#get_name' do
-  #   it 'gets name from a player' do
+  describe '#stop_connection' do
+    it 'stops an open connection, removes from clients and pending clients' do
+      @server.pending_clients << @client_socket
+      @server.clients << @client_socket
+      expect(@server.pending_clients.include?(@client_socket)).to eq true
+      expect(@server.clients.include?(@client_socket)).to eq true
+      @server.stop_connection(client: @client_socket)
+      expect(@client_socket.closed?).to be true
+      expect(@server.pending_clients.include?(@client_socket)).to eq false
+      expect(@server.clients.include?(@client_socket)).to eq false
+    end
+
+    it 'handles a closed connection without an exception, removes from clients and pending clients' do
+      @server.pending_clients << @client_socket
+      @server.clients << @client_socket
+      expect(@server.pending_clients.include?(@client_socket)).to eq true
+      expect(@server.clients.include?(@client_socket)).to eq true
+      @client_socket.close
+      @server.stop_connection(client: @client_socket)
+      expect(@client_socket.closed?).to be true
+      expect(@server.pending_clients.include?(@client_socket)).to eq false
+      expect(@server.clients.include?(@client_socket)).to eq false
+    end
+  end
+
+  describe '#stop_connections' do
+    it 'stops all connection, removes from clients and pending clients' do
+      @server.pending_clients << @client_socket
+      @server.clients << @client_socket
+      expect(@server.pending_clients.include?(@client_socket)).to eq true
+      expect(@server.clients.include?(@client_socket)).to eq true
+      @server.stop_connections(clients: [@client_socket])
+      expect(@client_socket.closed?).to be true
+      expect(@server.pending_clients.include?(@client_socket)).to eq false
+      expect(@server.clients.include?(@client_socket)).to eq false
+    end
+  end
+
+  # desribe '#stop' do
+  #   it 'stops the server and closes all connections' do
+  #     @server.pending_clients << @client_socket
+  #     @server.clients << @client_socket
+  #     @server.stop
+  #   end
+  # end
+
+  # describe '#play_game' do
+  #   it 'creates a game with two players and plays game' do
+  #
   #   end
   # end
 

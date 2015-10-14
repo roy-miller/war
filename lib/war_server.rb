@@ -19,7 +19,6 @@ class WarServer
   end
 
   def pair_players(client)
-    #puts "in pair_players"
     client.puts 'Welcome to war! Connecting you with a partner ...'
     @pending_clients << client
     if @pending_clients.count == 2
@@ -57,15 +56,18 @@ class WarServer
     # end
   end
 
-  # def stop
-  #   kill_clients
-  #   @running.kill
-  # end
-  #
-  # def kill_clients
-  #   @pending_clients.each { |client| client.close }
-  #   @clients.each { |client| client.close }
-  # end
+  def stop_connection(client:)
+    @pending_clients.delete(client)
+    @clients.delete(client)
+    client.close unless client.closed?
+  end
+
+  def stop_connections(clients:)
+    clients.each { |client| stop_connection(client: client) }
+  end
+
+  def stop_server
+  end
 
   def ask_for_name(client:)
     client.puts("Enter your name:")

@@ -1,6 +1,7 @@
 class Game
   attr_reader :deck
   attr_accessor :players
+  attr_accessor :winner
 
   def initialize
     @deck = CardDeck.new
@@ -15,6 +16,11 @@ class Game
     #  end
     #end
     @players = []
+    @winner
+  end
+
+  def add_player(player)
+    @players << player
   end
 
   def play_round(cards_played = [])
@@ -41,5 +47,21 @@ class Game
     end
 
     winner
+  end
+
+  def play
+    # if @players.first.out_of_cards?
+    #   @winner = @players.first
+    #   # declare game over?
+    # end
+    #
+    # if @players.last.out_of_cards?
+    #   @winner = @players.last
+    #   # declare game over?
+    # end
+    #
+    # while !@winner
+    #   play_round
+    # end
   end
 end

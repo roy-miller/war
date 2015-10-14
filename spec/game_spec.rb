@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe(Game) do
+describe Game do
   let(:game) do
     game = Game.new
     game.players << Player.new('player1')
@@ -10,7 +10,7 @@ describe(Game) do
   let(:higher_rank_card) { PlayingCard.new(rank: PlayingCard::QUEEN, suit: PlayingCard::SPADE) }
   let(:lower_rank_card) { PlayingCard.new(rank: PlayingCard::FOUR, suit: PlayingCard::HEART) }
 
-  describe('#new') do
+  describe '#new' do
     it 'creates a game with an empty deck and no players' do
       game = Game.new
       expect(game.deck.cards).to be_empty
@@ -18,7 +18,15 @@ describe(Game) do
     end
   end
 
-  describe('#play_round') do
+  describe '#add_player' do
+    it 'adds player' do
+      game = Game.new
+      game.add_player(Player.new('playername'))
+      expect(game.players.count).to eq 1
+    end
+  end
+
+  describe '#play_round' do
     context 'when player1 card ranks higher' do
       it 'declares player1 the winner, adds cards to player1' do
         game.players.first.hand = [higher_rank_card]
@@ -79,4 +87,16 @@ describe(Game) do
                                      card6, card7, card8, card9, card10)
     end
   end
+
+  # describe '#play' do
+  #   it 'plays rounds until one player runs out of cards' do
+  #     card1 = PlayingCard.new(rank: PlayingCard::TWO, suit: PlayingCard::SPADE)
+  #     card2 = PlayingCard.new(rank: PlayingCard::KING, suit: PlayingCard::CLUB)
+  #     card3 = PlayingCard.new(rank: PlayingCard::NINE, suit: PlayingCard::DIAMOND)
+  #     game.players.first.hand = [card1, card2]
+  #     game.players.last.hand = [card3]
+  #     game.play
+  #     expect(game.winner).to eq game.players.first
+  #   end
+  # end
 end

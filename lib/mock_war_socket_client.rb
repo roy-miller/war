@@ -4,8 +4,8 @@ class MockWarSocketClient
   attr_reader :socket
   attr_reader :output
 
-  def initialize(port)
-    @socket = TCPSocket.new('localhost', port)
+  def initialize(port: 2000)
+    @socket = TCPSocket.open('localhost', port)
   end
 
   def provide_input(text)

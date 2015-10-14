@@ -67,12 +67,17 @@ class WarServer
   #   @clients.each { |client| client.close }
   # end
 
-  def ask_for_name(client: $stdout)
+  def ask_for_name(client:)
     client.puts("Enter your name:")
   end
 
-  def get_name(client: $stdout)
-    client.read_nonblock(1000)
+  def get_name(client:)
+    begin
+      client.read_nonblock(1000)
+    rescue IO::WaitReadable
+      IO.select([client])
+      retry
+    end
   end
 
   def play_game

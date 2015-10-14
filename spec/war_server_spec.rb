@@ -63,6 +63,14 @@ describe WarServer do
     end
   end
 
+  describe '#get_name' do
+    it 'gets player name' do
+      @client.provide_input('Somebody')
+      result = @server.get_name(client: @client_socket)
+      expect(result).to include "Somebody"
+    end
+  end
+
   # describe '#get_name' do
   #   it 'gets name from a player' do
   #   end

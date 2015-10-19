@@ -13,22 +13,140 @@ end
 
 describe WarServer do
 
-  describe '#initialize' do
-    it 'creates a server with a socket' do
-      server = WarServer.new(port: 2000)
-      expect(server).to be_a WarServer
-      expect(server.socket).to be_a TCPServer
-      server.socket.close
+  context 'with server' do
+    before do
+      @server = WarServer.new
     end
+
+    after do
+      @server.stop
+    end
+
+    it 'does not make a game for only one player' do
+      expect(@server.games).to be_empty
+    end
+
+    it 'accepts client' do
+      client = MockWarSocketClient.new
+      client.start
+      @server.accept
+      expect(@server.pending_clients.count).to eq 1
+    end
+
+    it 'asks player for name' do
+      client = MockWarSocketClient.new
+      client.start
+      @server.accept
+      @server.ask_for_name(client: @server.pending_clients.first)
+      expect(client.output).to match /Enter your name/
+    end
+
+    it 'gets name from player' do
+      client = MockWarSocketClient.new
+      client.start
+      @server.accept
+      client.provide_input('player1')
+      result = @server.get_name(client: @server.pending_clients.first)
+      expect(result).to eq 'player1'
+    end
+
+    it 'does not make a game when there is only one player' do
+      client = MockWarSocketClient.new
+      client.start
+      @server.accept
+      game = @server.make_game
+      expect(game).to be_nil
+    end
+
+    it 'makes a game when there are two clients' do
+      client1 = MockWarSocketClient.new
+      client2 = MockWarSocketClient.new
+      client1.start
+      client2.start
+      @server.accept
+      @server.accept
+      client1.provide_input('player1')
+      client2.provide_input('player2')
+      @server.make_game
+      expect(@server.games.count).to eq 1
+    end
+
+    it 'congratulates player1 when he wins a round' do
+      client1 = MockWarSocketClient.new
+      client2 = MockWarSocketClient.new
+      client1.start
+      client2.start
+      @server.accept
+      @server.accept
+      winner = Player.new('player1')
+      loser = Player.new('player2')
+      game = Game.new
+      game.add_player(loser)
+      game.add_player(winner)
+      @server.games << game
+      @server.clients[winner] = @server.pending_clients.first
+      @server.clients[loser] = @server.pending_clients.last
+      @server.congratulate_round_winner(game, winner)
+      expect(client1.output).to match /You won/
+      expect(client2.output).to match /You lost/
+    end
+
+    it 'congratulates player2 when he wins a round' do
+      client1 = MockWarSocketClient.new
+      client2 = MockWarSocketClient.new
+      client1.start
+      client2.start
+      @server.accept
+      @server.accept
+      loser = Player.new('player1')
+      winner = Player.new('player2')
+      game = Game.new
+      game.add_player(loser)
+      game.add_player(winner)
+      @server.games << game
+      @server.clients[loser] = @server.pending_clients.first
+      @server.clients[winner] = @server.pending_clients.last
+      @server.congratulate_round_winner(game, winner)
+      expect(client1.output).to match /You lost/
+      expect(client2.output).to match /You won/
+    end
+
+    it 'congratulates player1 when he wins a game' do
+      client1 = MockWarSocketClient.new
+      client2 = MockWarSocketClient.new
+      client1.start
+      client2.start
+      @server.accept
+      @server.accept
+      loser = Player.new('player1')
+      winner = Player.new('player2')
+      game = Game.new
+      game.add_player(loser)
+      game.add_player(winner)
+      game.winner = winner
+      @server.games << game
+      @server.clients[loser] = @server.pending_clients.first
+      @server.clients[winner] = @server.pending_clients.last
+      @server.congratulate_game_winner(game)
+      expect(client1.output).to match /You lost/
+      expect(client2.output).to match /You won/
+    end
+
+    it 'allows multiple simultaneous games' do
+      
+    end
+=begin
   end
 
-  context 'with server and active client connection' do
+  context 'with server and active client connections' do
 
     before :each do
       @server = WarServer.new
       @server.socket.listen(5)
       @client = MockWarSocketClient.new
+      @client2 = MockWarSocketClient.new
       @client_socket = @server.socket.accept
+      @client2_socket = @server.socket.accept
     end
 
     after :each do
@@ -118,10 +236,37 @@ describe WarServer do
       end
     end
 
-    # describe '#play_game' do
-    #   it 'creates a game with two players and plays game' do
-    #
-    #   end
-    # end
+    context 'game is made' do
+      before :each do
+        @server.clients << @client_socket
+        @server.clients << @client2_socket
+        @client.provide_input("Player1")
+        @client2.provide_input("Player2")
+        @game = @server.make_game
+      end
+
+      describe '#congratulate_round_winner' do
+        it 'congratulates player1 when he wins the round' do
+          @server.congratulate_round_winner(@game.player1)
+          expect(@client.output).to include "You won the round!"
+          expect(@client2.output).to include "You lost the round"
+        end
+        it 'congratulates player1 when he wins the round' do
+          @server.congratulate_round_winner(@game.player2)
+          expect(@client.output).to include "You lost the round"
+          expect(@client2.output).to include "You won the round!"
+        end
+      end
+
+      describe '#congratulate_game_winner' do
+        it 'congratulates player1 when he wins the game' do
+          @server.congratulate_game_winner(@game.player1)
+          expect(@client.output).to match(/You won the game!/)
+          expect(@client2.output).to match(/You lost the game/)
+        end
+      end
+
+    end
+=end
   end
 end

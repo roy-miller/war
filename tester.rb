@@ -22,3 +22,22 @@ end
 #   puts "something went wrong"
 # end
 # #s.close
+
+class MockWarSocketClient
+  def initialize
+    TCPSocket.new('localhost', 2000)
+  end
+end
+
+describe WarServer do
+  it 'is not listening on default port' do
+    server = WarServer.new
+    begin
+      client = MockWarSocketClient.new
+      expect(false).to be true
+    rescue => e
+      puts e.message
+      expect(e.message).to match(/socket/i)
+    end
+  end
+end

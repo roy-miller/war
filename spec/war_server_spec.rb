@@ -132,8 +132,12 @@ describe WarServer do
       expect(client2.output).to match /You won/
     end
 
+    # server must allow multiple simultaneous games
+    # player can only participate in one game at a time
+    # no games should be blocked by another game
+    # players must tell you when it is ok to play the next card
     it 'allows multiple simultaneous games' do
-      
+
     end
 =begin
   end

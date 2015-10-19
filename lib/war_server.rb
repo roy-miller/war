@@ -19,7 +19,7 @@ class WarServer
   def start
     loop do
       Thread.start(accept) do |client|
-        run
+        run(client)
       end
     end
   end
@@ -33,16 +33,16 @@ class WarServer
   def run(client)
     new_game = make_game
     if new_game
-      pair_clients_and_players
+      pair_clients_and_players(new_game)
       play_game(new_game)
       stop_connection(client: @clients[new_game.players.first])
       stop_connection(client: @clients[new_game.players.last])
     end
   end
 
-  def pair_clients_and_players
+  def pair_clients_and_players(game)
     @pending_clients.each_with_index do |client, index|
-      clients[game.players[index]] = client
+      @clients[game.players[index]] = client
     end
   end
 
@@ -79,6 +79,7 @@ class WarServer
   end
 
   def play_game(new_game)
+    puts "playing game: #{new_game}"
     new_game.deal
     while !new_game.over?
       winner = new_game.play_round

@@ -69,6 +69,7 @@ describe WarServer do
       client2.provide_input('player2')
       @server.make_game
       expect(@server.games.count).to eq 1
+      expect(@server.pending_clients.count).to eq 0
     end
 
     it 'congratulates player1 when he wins a round' do
@@ -132,13 +133,31 @@ describe WarServer do
       expect(client2.output).to match /You won/
     end
 
-    # server must allow multiple simultaneous games
     # player can only participate in one game at a time
     # no games should be blocked by another game
     # players must tell you when it is ok to play the next card
     it 'allows multiple simultaneous games' do
-
+      existing_player1 = Player.new('player1')
+      existing_player2 = Player.new('player2')
+      existing_game = Game.new
+      existing_game.add_player(existing_player1)
+      existing_game.add_player(existing_player2)
+      @server.games << existing_game
+      client1 = MockWarSocketClient.new
+      client2 = MockWarSocketClient.new
+      [client1, client2].each_with_index do |client, index|
+        client.start
+        client.provide_input("player#{index}")
+        @server.accept
+      end
+      @server.make_game
+      expect(@server.games.count).to eq 2
     end
+
+    it 'allows a player to participate in only one game' do
+      
+    end
+
 =begin
   end
 

@@ -31,10 +31,10 @@ class WarServer
   end
 
   def run(client)
-    new_game = make_game
-    if new_game
-      pair_clients_and_players(new_game)
-      play_game(new_game)
+    game = make_game
+    if game
+      pair_clients_and_players(game)
+      play_game(game)
       stop_connection(client: @clients[new_game.players.first])
       stop_connection(client: @clients[new_game.players.last])
     end
@@ -48,12 +48,14 @@ class WarServer
 
   def make_game
     if @pending_clients.count == 2
-      ask_for_name(client: @pending_clients[0])
-      player1_name = get_name(client: @pending_clients[0])
+      client = @pending_clients.shift
+      ask_for_name(client: client)
+      player1_name = get_name(client: client)
       player1 = Player.new(player1_name)
 
-      ask_for_name(client: @pending_clients[1])
-      player2_name = get_name(client: @pending_clients[1])
+      client = @pending_clients.shift
+      ask_for_name(client: client)
+      player2_name = get_name(client: client)
       player2 = Player.new(player2_name)
 
       game = Game.new
@@ -78,33 +80,32 @@ class WarServer
     end
   end
 
-  def play_game(new_game)
-    puts "playing game: #{new_game}"
-    new_game.deal
-    while !new_game.over?
-      winner = new_game.play_round
-      congratulate_round_winner(new_game, winner)
+  def play_game(game)
+    game.deal
+    while !game.over?
+      winner = game.play_round
+      congratulate_round_winner(game, winner)
     end
-    congratulate_game_winner(new_game)
+    congratulate_game_winner(game)
   end
 
-  def congratulate_round_winner(a_game, winner)
-    if a_game.player1 == winner
-      @clients[a_game.player1].puts "You won the round!"
-      @clients[a_game.player2].puts "You lost the round"
-    elsif a_game.player2 == winner
-      @clients[a_game.player2].puts "You won the round!"
-      @clients[a_game.player1].puts "You lost the round"
+  def congratulate_round_winner(game, winner)
+    if game.player1 == winner
+      @clients[game.player1].puts "You won the round!"
+      @clients[game.player2].puts "You lost the round"
+    elsif game.player2 == winner
+      @clients[game.player2].puts "You won the round!"
+      @clients[game.player1].puts "You lost the round"
     end
   end
 
-  def congratulate_game_winner(a_game)
-    if a_game.player1 == a_game.winner
-      @clients[a_game.player1].puts "You won the game!"
-      @clients[a_game.player2].puts "You lost the game"
-    elsif a_game.player2 == a_game.winner
-      @clients[a_game.player2].puts "You won the game!"
-      @clients[a_game.player1].puts "You lost the game"
+  def congratulate_game_winner(game)
+    if game.player1 == game.winner
+      @clients[game.player1].puts "You won the game!"
+      @clients[game.player2].puts "You lost the game"
+    elsif game.player2 == game.winner
+      @clients[game.player2].puts "You won the game!"
+      @clients[game.player1].puts "You lost the game"
     end
   end
 
@@ -117,11 +118,6 @@ class WarServer
     @pending_clients.delete(client)
     client.close unless client.closed?
   end
-
-  # def stop_game
-  #   stop_connection(@clients.first)
-  #   stop_connection(@clients.last)
-  # end
 end
 
 # begin

@@ -110,7 +110,7 @@ class WarServer
   end
 
   def stop
-    @pending_clients.each { |client| stop_connection(client: client) }
+    @clients.each { |key,value| stop_connection(client: value) }
     @socket.close unless @socket.closed?
   end
 

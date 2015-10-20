@@ -3,9 +3,9 @@ require 'spec_helper'
 describe PlayingCard do
   describe '#suit and #rank' do
       it 'has a suit and a rank' do
-        card = PlayingCard.new(rank: PlayingCard::TWO, suit: PlayingCard::SPADE)
-        expect(card.suit).to eq PlayingCard::SPADE
-        expect(card.rank).to eq PlayingCard::TWO
+        card = PlayingCard.new(rank: '2', suit: 'S')
+        expect(card.suit).to eq 'S'
+        expect(card.rank).to eq '2'
       end
   end
 
@@ -39,6 +39,13 @@ describe PlayingCard do
 
       card2 = PlayingCard.new(rank: 'rank', suit: 'differentsuit')
       expect(card1.eql?(card2)).to be false
+    end
+  end
+
+  describe '#rank_value' do
+    it 'answers value corresponding to numeric rank string' do
+      card = PlayingCard.new(rank: '5', suit: 'suit')
+      expect(card.rank_value).to eq 5
     end
   end
 end

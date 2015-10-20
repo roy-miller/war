@@ -1,14 +1,16 @@
 require 'spec_helper'
 
 describe Game do
+  include PlayingCardConstants
+  let(:thing) { joe = CONSTANT1; joe }
   let(:game) do
     game = Game.new
     game.players << Player.new('player1')
     game.players << Player.new('player2')
     game
   end
-  let(:higher_rank_card) { PlayingCard.new(rank: PlayingCard::QUEEN, suit: PlayingCard::SPADE) }
-  let(:lower_rank_card) { PlayingCard.new(rank: PlayingCard::FOUR, suit: PlayingCard::HEART) }
+  let(:higher_rank_card) { PlayingCard.new(rank: 'Q', suit: 'S') }
+  let(:lower_rank_card) { PlayingCard.new(rank: '4', suit: 'H') }
 
   describe '#new' do
     it 'creates a game with a deck of playing cards and no players' do
@@ -77,12 +79,12 @@ describe Game do
       end
       context 'when ranks are the same' do
         it 'declares war, adds cards to winner' do
-          card1 = PlayingCard.new(rank: PlayingCard::KING, suit: PlayingCard::CLUB)
-          card2 = PlayingCard.new(rank: PlayingCard::TWO, suit: PlayingCard::SPADE)
-          card3 = PlayingCard.new(rank: PlayingCard::JACK, suit: PlayingCard::SPADE)
-          card4 = PlayingCard.new(rank: PlayingCard::NINE, suit: PlayingCard::DIAMOND)
-          card5 = PlayingCard.new(rank: PlayingCard::EIGHT, suit: PlayingCard::CLUB)
-          card6 = PlayingCard.new(rank: PlayingCard::JACK, suit: PlayingCard::HEART)
+          card1 = PlayingCard.new(rank: 'K', suit: 'C')
+          card2 = PlayingCard.new(rank: '2', suit: 'S')
+          card3 = PlayingCard.new(rank: 'J', suit: 'S')
+          card4 = PlayingCard.new(rank: '9', suit: 'D')
+          card5 = PlayingCard.new(rank: '8', suit: 'C')
+          card6 = PlayingCard.new(rank: 'J', suit: 'H')
           game.players.first.hand = [card1, card2, card3]
           game.players.last.hand = [card4, card5, card6]
 
@@ -93,16 +95,16 @@ describe Game do
         end
       end
       it 'declares multiple wars, adds cards to winner' do
-        card1 = PlayingCard.new(rank: PlayingCard::SIX, suit: PlayingCard::HEART)
-        card2 = PlayingCard.new(rank: PlayingCard::SIX, suit: PlayingCard::SPADE)
-        card3 = PlayingCard.new(rank: PlayingCard::KING, suit: PlayingCard::CLUB)
-        card4 = PlayingCard.new(rank: PlayingCard::THREE, suit: PlayingCard::CLUB)
-        card5 = PlayingCard.new(rank: PlayingCard::JACK, suit: PlayingCard::SPADE)
-        card6 = PlayingCard.new(rank: PlayingCard::TEN, suit: PlayingCard::DIAMOND)
-        card7 = PlayingCard.new(rank: PlayingCard::ACE, suit: PlayingCard::SPADE)
-        card8 = PlayingCard.new(rank: PlayingCard::KING, suit: PlayingCard::CLUB)
-        card9 = PlayingCard.new(rank: PlayingCard::FIVE, suit: PlayingCard::DIAMOND)
-        card10 = PlayingCard.new(rank: PlayingCard::JACK, suit: PlayingCard::HEART)
+        card1 = PlayingCard.new(rank: '6', suit: 'H')
+        card2 = PlayingCard.new(rank: '6', suit: 'S')
+        card3 = PlayingCard.new(rank: 'K', suit: 'C')
+        card4 = PlayingCard.new(rank: '3', suit: 'C')
+        card5 = PlayingCard.new(rank: 'J', suit: 'S')
+        card6 = PlayingCard.new(rank: '10', suit: 'D')
+        card7 = PlayingCard.new(rank: 'A', suit: 'S')
+        card8 = PlayingCard.new(rank: 'K', suit: 'C')
+        card9 = PlayingCard.new(rank: '5', suit: 'D')
+        card10 = PlayingCard.new(rank: 'J', suit: 'H')
         game.players.first.hand = [card1, card2, card3, card4, card5]
         game.players.last.hand = [card6, card7, card8, card9, card10]
 
@@ -113,13 +115,13 @@ describe Game do
                                        card6, card7, card8, card9, card10)
       end
       it 'does not play if the game is over' do
-        game.players.first.hand = [PlayingCard.new(rank: PlayingCard::SIX, suit: PlayingCard::HEART)]
+        game.players.first.hand = [PlayingCard.new(rank: '6', suit: 'H')]
         game.players.last.hand = []
         winner = game.play_round
         expect(winner).to be game.player1
 
         game.players.first.hand = []
-        game.players.last.hand = [PlayingCard.new(rank: PlayingCard::SIX, suit: PlayingCard::HEART)]
+        game.players.last.hand = [PlayingCard.new(rank: '6', suit: 'H')]
         winner = game.play_round
         expect(winner).to be game.player2
       end

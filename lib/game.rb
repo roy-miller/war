@@ -1,28 +1,16 @@
 require_relative './card_deck.rb'
 require_relative './playing_card.rb'
+require_relative './playing_card_constants.rb'
 
 class Game
+  include PlayingCardConstants
+
   attr_reader :deck
   attr_accessor :players
   attr_accessor :winner
 
   def initialize
     @deck = CardDeck.new
-    # suits = [PlayingCard::SPADE, PlayingCard::CLUB, PlayingCard::HEART, PlayingCard::DIAMOND]
-    # ranks = [PlayingCard::TWO, PlayingCard::THREE, PlayingCard::FOUR, PlayingCard::FIVE,
-    #        PlayingCard::SIX, PlayingCard::SEVEN, PlayingCard::EIGHT, PlayingCard::NINE,
-    #        PlayingCard::TEN, PlayingCard::JACK, PlayingCard::QUEEN, PlayingCard::KING,
-    #        PlayingCard::ACE]
-    suits = [PlayingCard::SPADE, PlayingCard::CLUB, PlayingCard::HEART, PlayingCard::DIAMOND]
-    ranks = [PlayingCard::TWO, PlayingCard::THREE, PlayingCard::FOUR, PlayingCard::FIVE,
-             PlayingCard::SIX, PlayingCard::SEVEN, PlayingCard::EIGHT, PlayingCard::NINE,
-             PlayingCard::TEN, PlayingCard::JACK, PlayingCard::QUEEN, PlayingCard::KING,
-             PlayingCard::ACE]
-    suits.each do |suit|
-     ranks.each do |rank|
-       @deck.add(PlayingCard.new(rank: rank, suit: suit))
-     end
-    end
     @players = []
     @winner
   end
@@ -45,6 +33,7 @@ class Game
   end
 
   def play_round(cards_played = [])
+    puts "playing round: #{cards_played}"
     return declare_game_winner if over?
 
     card1 = @players.first.play_card
@@ -52,13 +41,16 @@ class Game
     cards_played.push(card1, card2)
 
     winner = nil
-    if card1.rank > card2.rank
+    if card1.rank_value > card2.rank_value
+      puts "card1:#{card1.rank} > card2:#{card2.rank}"
       winner = @players.first
       winner.add_cards_to_hand(cards_played)
-    elsif card2.rank > card1.rank
+    elsif card2.rank_value > card1.rank_value
+      puts "card2:#{card2.rank} > card1:#{card1.rank}"
       winner = @players.last
       winner.add_cards_to_hand(cards_played)
-    elsif card1.rank == card2.rank
+    elsif card1.rank_value == card2.rank_value
+      puts "card1:#{card1.rank} == card2:#{card2.rank}"
       return declare_game_winner if over?
       war_card1 = @players.first.play_card
       return declare_game_winner if over?

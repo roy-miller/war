@@ -1,34 +1,19 @@
 require 'spec_helper'
 
 describe CardDeck do
-
   let(:deck) { CardDeck.new }
-  let(:full_deck) do
-    deck = CardDeck.new
-    suits = [PlayingCard::SPADE, PlayingCard::CLUB, PlayingCard::HEART, PlayingCard::DIAMOND]
-    ranks = [PlayingCard::TWO, PlayingCard::THREE, PlayingCard::FOUR, PlayingCard::FIVE,
-            PlayingCard::SIX, PlayingCard::SEVEN, PlayingCard::EIGHT, PlayingCard::NINE,
-            PlayingCard::TEN, PlayingCard::JACK, PlayingCard::QUEEN, PlayingCard::KING,
-            PlayingCard::ACE]
-    suits.each do |suit|
-      ranks.each do |rank|
-        deck.add(PlayingCard.new(rank: rank, suit: suit))
-      end
-    end
-    deck
-  end
 
   describe '#new' do
-      it 'has no cards' do
+      it 'has a full set of playing cards' do
         deck = CardDeck.new
-        expect(deck.cards.count).to eq 0
+        expect(deck.cards.count).to eq 52
       end
   end
 
   describe '#add' do
     it 'adds a card' do
       deck.add(PlayingCard.new(rank: 'rank', suit: 'suit'))
-      expect(deck.cards.count).to eq 1
+      expect(deck.cards.count).to eq 53
     end
   end
 
@@ -36,8 +21,9 @@ describe CardDeck do
     it 'removes a card' do
       card = PlayingCard.new(rank: 'rank', suit: 'suit')
       deck.cards << card
+      expect(deck.cards).to include card
       deck.remove(card)
-      expect(deck.cards).to be_empty
+      expect(deck.cards).not_to include card
     end
   end
 
@@ -65,23 +51,28 @@ describe CardDeck do
       player1 = Player.new('player1')
       player2 = Player.new('player2')
 
-      full_deck.deal(26, [player1, player2])
+      deck.deal(26, [player1, player2])
 
-      expect(full_deck.cards).to be_empty
+      expect(deck.cards).to be_empty
       expect(player1.hand.count).to eq 26
       expect(player2.hand.count).to eq 26
     end
   end
 
   describe '#has_cards?' do
-    context 'when deck is empty' do
-      it 'should answer false' do
-        expect(deck.has_cards?).to be false
-      end
-    end
     context 'when deck has cards' do
       it 'should answer true when the deck has cards' do
-        expect(full_deck.has_cards?).to be true
+        expect(deck.has_cards?).to be true
+      end
+    end
+    context 'when deck is empty' do
+      let(:deck) do
+        deck = CardDeck.new
+        deck.cards = []
+        deck
+      end
+      it 'should answer false' do
+        expect(deck.has_cards?).to be false
       end
     end
   end
@@ -89,14 +80,14 @@ describe CardDeck do
   describe '#card_count' do
     context 'when deck is a full deck of playing cards' do
       it 'should answer the number of cards' do
-        expect(full_deck.card_count).to eq 52
+        expect(deck.card_count).to eq 52
       end
     end
     context 'after dealing cards' do
       it 'should answer the number of cards remaining' do
         player = Player.new('playername')
-        full_deck.deal(1, [player])
-        expect(full_deck.card_count).to eq 51
+        deck.deal(1, [player])
+        expect(deck.card_count).to eq 51
       end
     end
   end

@@ -12,13 +12,13 @@ describe(Player) do
 
   describe('#add_card_to_hand') do
     it 'adds card to empty hand' do
-      added_card = PlayingCard.new(rank: PlayingCard::QUEEN, suit: PlayingCard::HEART)
+      added_card = PlayingCard.new(rank: 'Q', suit: 'H')
       player.add_card_to_hand(added_card)
       expect(player.hand).to match([added_card])
     end
     it 'adds card to bottom of non-empty hand' do
-      existing_card = PlayingCard.new(rank: PlayingCard::QUEEN, suit: PlayingCard::HEART)
-      added_card = PlayingCard.new(rank: PlayingCard::TWO, suit: PlayingCard::SPADE)
+      existing_card = PlayingCard.new(rank: 'Q', suit: 'H')
+      added_card = PlayingCard.new(rank: '2', suit: 'S')
       player.hand << (existing_card)
       player.add_card_to_hand(added_card)
       expect(player.hand).to match([added_card, existing_card])
@@ -27,9 +27,9 @@ describe(Player) do
 
   describe('#add_cards_to_hand') do
     it 'adds collection of cards to bottom of hand' do
-      card1 = PlayingCard.new(rank: PlayingCard::FOUR, suit: PlayingCard::SPADE)
-      card2 = PlayingCard.new(rank: PlayingCard::ACE, suit: PlayingCard::CLUB)
-      card3 = PlayingCard.new(rank: PlayingCard::ACE, suit: PlayingCard::DIAMOND)
+      card1 = PlayingCard.new(rank: '4', suit: 'S')
+      card2 = PlayingCard.new(rank: 'A', suit: 'C')
+      card3 = PlayingCard.new(rank: 'A', suit: 'D')
       player.hand << card1
       cards_to_add = [card2, card3]
       player.add_cards_to_hand(cards_to_add)
@@ -39,9 +39,9 @@ describe(Player) do
 
   describe('#play_card') do
     it 'plays top card' do
-      card1 = PlayingCard.new(rank: PlayingCard::QUEEN, suit: PlayingCard::SPADE)
-      card2 = PlayingCard.new(rank: PlayingCard::FIVE, suit: PlayingCard::SPADE)
-      top_card = PlayingCard.new(rank: PlayingCard::TEN, suit: PlayingCard::HEART)
+      card1 = PlayingCard.new(rank: 'Q', suit: 'S')
+      card2 = PlayingCard.new(rank: '5', suit: 'S')
+      top_card = PlayingCard.new(rank: '10', suit: 'H')
       player.hand << card1
       player.hand << card2
       player.hand << top_card

@@ -1,11 +1,19 @@
+require 'playing_card_constants'
+
 class CardDeck
-  attr_reader :cards
-  attr_accessor :ranks, :suits
+  include PlayingCardConstants
+
+  attr_accessor :cards
 
   def initialize
+    @suits = ['S','C','H','D']
+    @ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K','A']
     @cards = Array.new
-    @suits = ['C','S','H','D']
-    @ranks = ['1','2','3','4','5','6','7','8','9','10','J','Q','K']
+    @suits.each do |suit|
+      @ranks.each do |rank|
+        @cards << PlayingCard.new(rank: rank, suit: suit)
+      end
+    end
   end
 
   def add(card)

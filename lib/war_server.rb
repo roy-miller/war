@@ -17,7 +17,7 @@ class WarServer
   end
 
   def start
-    loop do
+    until @socket.closed? do
       Thread.start(accept) do |client|
         run(client)
       end
@@ -48,15 +48,8 @@ class WarServer
 
   def make_game
     if @pending_clients.count == 2
-      client = @pending_clients.shift
-      ask_for_name(client: client)
-      player1_name = get_name(client: client)
-      player1 = Player.new(player1_name)
-
-      client = @pending_clients.shift
-      ask_for_name(client: client)
-      player2_name = get_name(client: client)
-      player2 = Player.new(player2_name)
+      player1 = get_player_for_game
+      player2 = get_player_for_game
 
       game = Game.new
       game.add_player(player1)
@@ -64,6 +57,13 @@ class WarServer
       games << game
       game
     end
+  end
+
+  def get_player_for_game
+    client = @pending_clients.shift
+    ask_for_name(client: client)
+    player_name = get_name(client: client)
+    Player.new(player_name)
   end
 
   def ask_for_name(client:)

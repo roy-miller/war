@@ -1,10 +1,7 @@
 require_relative './card_deck.rb'
 require_relative './playing_card.rb'
-require_relative './playing_card_constants.rb'
 
 class Game
-  include PlayingCardConstants
-
   attr_reader :deck
   attr_accessor :players
   attr_accessor :winner

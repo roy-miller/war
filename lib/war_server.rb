@@ -1,10 +1,7 @@
 require 'socket'
+require 'json'
 require_relative './player.rb'
 require_relative './game.rb'
-
-# needs to track clients by unique id
-# needs to give a new client a unique id
-# needs to demand a unique id whenever a client wants to play a round
 
 class WarServer
   attr_accessor :port, :socket, :pending_clients, :clients, :game
@@ -31,9 +28,12 @@ class WarServer
 
   def accept
     client_socket = @socket.accept
+    # TODO need a ClientConnection class, or similar?
     @pending_clients << { socket: client_socket, unique_id: @next_unique_id }
+    response = JSON.dump({ unique_id: @next_unique_id,
+                           message: 'Welcome to war! Connecting you with a partner' })
+    client_socket.puts response
     @next_unique_id += 1
-    client_socket.puts 'Welcome to war! Connecting you with a partner'
   end
 
   def run(client)
@@ -88,7 +88,7 @@ class WarServer
   def play_game(game)
     game.deal
     while !game.over?
-      result = game.play_round
+      result = game.play_round # wait for player input
       congratulate_round_winner(game, result.winner)
     end
     congratulate_game_winner(game)

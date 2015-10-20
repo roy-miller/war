@@ -1,8 +1,4 @@
-require 'playing_card_constants'
-
 class CardDeck
-  include PlayingCardConstants
-
   attr_accessor :cards
 
   def initialize

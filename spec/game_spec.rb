@@ -1,8 +1,6 @@
 require 'spec_helper'
 
 describe Game do
-  include PlayingCardConstants
-  let(:thing) { joe = CONSTANT1; joe }
   let(:game) do
     game = Game.new
     game.players << Player.new('player1')
@@ -59,22 +57,26 @@ describe Game do
     end
 
     describe '#play_round' do
-      context 'when player1 card ranks higher' do
-        it 'declares player1 the winner, adds cards to player1' do
+      context 'when player1 wins' do
+        it 'declares a result with player1 the winner, adds cards to player1' do
           game.players.first.hand = [higher_rank_card]
           game.players.last.hand = [lower_rank_card]
-          winner = game.play_round
-          expect(winner.name).to eq 'player1'
-          expect(winner.hand).to include(higher_rank_card, lower_rank_card)
+          result = game.play_round
+          expect(result.winner).to eq player1
+          expect(result.cards_played[:player1]).to match_array([higher_rank_card])
+          expect(result.cards_played[:player2]).to match_array([lower_rank_card])
+          expect(game.players.first.hand).to include(higher_rank_card, lower_rank_card)
         end
       end
-      context 'when player2 card ranks higher' do
-        it 'declares player2 the winner when its card rank is higher, adds cards to player2' do
+      context 'when player2 wins' do
+        it 'declares a result with player2 the winner, adds cards to player2' do
           game.players.first.hand = [lower_rank_card]
           game.players.last.hand = [higher_rank_card]
-          winner = game.play_round
-          expect(winner.name).to eq 'player2'
-          expect(winner.hand).to include(lower_rank_card, higher_rank_card)
+          result = game.play_round
+          expect(result.winner).to eq player2
+          expect(result.cards_played[:player1]).to match_array([lower_rank_card])
+          expect(result.cards_played[:player2]).to match_array([higher_rank_card])
+          expect(game.players.last.hand).to include(higher_rank_card, lower_rank_card)
         end
       end
       context 'when ranks are the same' do
@@ -88,10 +90,12 @@ describe Game do
           game.players.first.hand = [card1, card2, card3]
           game.players.last.hand = [card4, card5, card6]
 
-          winner = game.play_round
+          result = game.play_round
 
-          expect(winner.name).to eq 'player1'
-          expect(winner.hand).to include(card1, card2, card3, card4, card5, card6)
+          expect(result.winner).to eq game.players.first
+          expect(result.cards_played[:player1]).to match_array([card1,card2,card3])
+          expect(result.cards_played[:player2]).to match_array([card4,card5,card6])
+          expect(game.players.first.hand).to include(card1, card2, card3, card4, card5, card6)
         end
       end
       it 'declares multiple wars, adds cards to winner' do
@@ -108,11 +112,13 @@ describe Game do
         game.players.first.hand = [card1, card2, card3, card4, card5]
         game.players.last.hand = [card6, card7, card8, card9, card10]
 
-        winner = game.play_round
+        result = game.play_round
 
-        expect(winner.name).to eq 'player2'
-        expect(winner.hand).to include(card1, card2, card3, card4, card5,
-                                       card6, card7, card8, card9, card10)
+        expect(result.winner).to eq game.players.last
+        expect(result.cards_played[:player1]).to match_array([card1,card2,card3,card4,card5])
+        expect(result.cards_played[:player2]).to match_array([card6,card7,card8,card9,card10])
+        expect(game.players.last.hand).to include(card1, card2, card3, card4, card5,
+                                                  card6, card7, card8, card9, card10)
       end
       it 'does not play if the game is over' do
         game.players.first.hand = [PlayingCard.new(rank: '6', suit: 'H')]
@@ -144,8 +150,16 @@ describe Game do
     end
 
     describe '#declare_game_winner' do
-      it 'declares winner' do
+      it 'declares player1 the winner when player2 is out of cards' do
+        game.player1.hand = [PlayingCard.new(rank: 'K', suit: 'C')]
+        game.player2.hand = []
+        expect(game.declare_game_winner).to be player1
+      end
 
+      it 'declares player2 the winner when player1 is out of cards' do
+        game.player1.hand = []
+        game.player2.hand = [PlayingCard.new(rank: 'K', suit: 'C')]
+        expect(game.declare_game_winner).to be player2
       end
     end
   end

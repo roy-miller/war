@@ -32,39 +32,45 @@ class Game
     @deck.deal(26, @players)
   end
 
-  def play_round(cards_played = [])
-    puts "playing round: #{cards_played}"
+  def play_round(cards_played = {player1: [], player2: []})
     return declare_game_winner if over?
 
     card1 = @players.first.play_card
     card2 = @players.last.play_card
-    cards_played.push(card1, card2)
+    cards_played[:player1].push(card1)
+    cards_played[:player2].push(card2)
 
     winner = nil
     if card1.rank_value > card2.rank_value
-      puts "card1:#{card1.rank} > card2:#{card2.rank}"
       winner = @players.first
-      winner.add_cards_to_hand(cards_played)
+      [cards_played[:player1],cards_played[:player2]].each do |cards|
+        winner.add_cards_to_hand(cards)
+      end
     elsif card2.rank_value > card1.rank_value
-      puts "card2:#{card2.rank} > card1:#{card1.rank}"
       winner = @players.last
-      winner.add_cards_to_hand(cards_played)
+      [cards_played[:player1],cards_played[:player2]].each do |cards|
+        winner.add_cards_to_hand(cards)
+      end
     elsif card1.rank_value == card2.rank_value
-      puts "card1:#{card1.rank} == card2:#{card2.rank}"
       return declare_game_winner if over?
       war_card1 = @players.first.play_card
       return declare_game_winner if over?
       war_card2 = @players.last.play_card
       return declare_game_winner if over?
-      cards_played.push(war_card1, war_card2)
+      cards_played[:player1].push(war_card1)
+      cards_played[:player2].push(war_card2)
       while !winner
-        winner = play_round(cards_played)
+        result = play_round(cards_played)
+        winner = result.winner
       end
     elsif over?
       winner = declare_game_winner
     end
 
-    winner
+    RoundResult.new(winner: winner, cards_played: {
+      player1: cards_played[:player1],
+      player2: cards_played[:player2]
+    })
   end
 
   def declare_game_winner

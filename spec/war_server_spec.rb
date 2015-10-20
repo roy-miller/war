@@ -17,18 +17,19 @@ describe WarServer do
       @server.stop
     end
 
-    it 'accepts client' do
+    it 'accepts a new client and gives it a unique id' do
       expect(@server.pending_clients.count).to eq 1
+      expect(@server.pending_clients.first[:unique_id]).to eq 1
     end
 
     it 'asks player for name' do
-      @server.ask_for_name(client: @server.pending_clients.first)
+      @server.ask_for_name(client: @server.pending_clients.first[:socket])
       expect(@client.output).to match /Enter your name/
     end
 
     it 'gets name from player' do
       @client.provide_input('player1')
-      result = @server.get_name(client: @server.pending_clients.first)
+      result = @server.get_name(client: @server.pending_clients.first[:socket])
       expect(result).to eq 'player1'
     end
 
@@ -85,9 +86,6 @@ describe WarServer do
         end
       end
 
-      # player can only participate in one game at a time
-      # no games should be blocked by another game
-      # players must tell you when it is ok to play the next card
       it 'allows multiple simultaneous games' do
         existing_player1 = Player.new('player1')
         existing_player2 = Player.new('player2')

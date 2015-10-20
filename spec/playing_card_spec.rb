@@ -48,4 +48,11 @@ describe PlayingCard do
       expect(card.rank_value).to eq 5
     end
   end
+
+  describe '#to_s' do
+    it 'answers a string with rank and suit' do
+      card = PlayingCard.new(rank: 'arank', suit: 'asuit')
+      expect(card.to_s).to eq 'arankasuit'
+    end
+  end
 end

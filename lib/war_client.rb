@@ -1,0 +1,2 @@
+class WarClient
+end

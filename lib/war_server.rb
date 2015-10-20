@@ -2,6 +2,10 @@ require 'socket'
 require_relative './player.rb'
 require_relative './game.rb'
 
+# needs to track clients by unique id
+# needs to give a new client a unique id
+# needs to demand a unique id whenever a client wants to play a round
+
 class WarServer
   attr_accessor :port, :socket, :pending_clients, :clients, :game
 
@@ -10,6 +14,7 @@ class WarServer
     @socket = TCPServer.open('localhost', port)
     @pending_clients = []
     @clients = {}
+    @next_unique_id = 1
   end
 
   def games
@@ -25,9 +30,10 @@ class WarServer
   end
 
   def accept
-    client = @socket.accept
-    @pending_clients << client
-    client.puts 'Welcome to war! Connecting you with a partner'
+    client_socket = @socket.accept
+    @pending_clients << { socket: client_socket, unique_id: @next_unique_id }
+    @next_unique_id += 1
+    client_socket.puts 'Welcome to war! Connecting you with a partner'
   end
 
   def run(client)
@@ -61,8 +67,8 @@ class WarServer
 
   def get_player_for_game
     client = @pending_clients.shift
-    ask_for_name(client: client)
-    player_name = get_name(client: client)
+    ask_for_name(client: client[:socket])
+    player_name = get_name(client: client[:socket])
     Player.new(player_name)
   end
 
@@ -72,8 +78,7 @@ class WarServer
 
   def get_name(client:)
     begin
-      text = client.read_nonblock(1000).chomp
-      text
+      client.read_nonblock(1000).chomp
     rescue IO::WaitReadable
       IO.select([client])
       retry
@@ -83,29 +88,29 @@ class WarServer
   def play_game(game)
     game.deal
     while !game.over?
-      winner = game.play_round
-      congratulate_round_winner(game, winner)
+      result = game.play_round
+      congratulate_round_winner(game, result.winner)
     end
     congratulate_game_winner(game)
   end
 
   def congratulate_round_winner(game, winner)
     if game.player1 == winner
-      @clients[game.player1].puts "You won the round!"
-      @clients[game.player2].puts "You lost the round"
+      @clients[game.player1][:socket].puts "You won the round!"
+      @clients[game.player2][:socket].puts "You lost the round"
     elsif game.player2 == winner
-      @clients[game.player2].puts "You won the round!"
-      @clients[game.player1].puts "You lost the round"
+      @clients[game.player2][:socket].puts "You won the round!"
+      @clients[game.player1][:socket].puts "You lost the round"
     end
   end
 
   def congratulate_game_winner(game)
     if game.player1 == game.winner
-      @clients[game.player1].puts "You won the game!"
-      @clients[game.player2].puts "You lost the game"
+      @clients[game.player1][:socket].puts "You won the game!"
+      @clients[game.player2][:socket].puts "You lost the game"
     elsif game.player2 == game.winner
-      @clients[game.player2].puts "You won the game!"
-      @clients[game.player1].puts "You lost the game"
+      @clients[game.player2][:socket].puts "You won the game!"
+      @clients[game.player1][:socket].puts "You lost the game"
     end
   end
 
@@ -116,7 +121,7 @@ class WarServer
 
   def stop_connection(client:)
     @pending_clients.delete(client)
-    client.close unless client.closed?
+    client[:socket].close unless client[:socket].closed?
   end
 end
 

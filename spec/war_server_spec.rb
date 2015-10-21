@@ -56,20 +56,31 @@ describe WarServer do
         expect(@server.pending_clients.count).to eq 0
       end
 
-      it 'sends game round results to clients' do
-        winner = Player.new('player1')
-        loser = Player.new('player2')
-        @server.clients[winner] = @server.pending_clients.first
-        @server.clients[loser] = @server.pending_clients.last
-        cards_played = {
-                          player1: [PlayingCard.new(rank: 'J', suit: 'H')],
-                          player2: [PlayingCard.new(rank: '2', suit: 'C')]
-                       }
-        result = RoundResult.new(winner: winner, loser: loser, cards_played: cards_played)
-        @server.send_result_to_clients(result)
-        result_json_string = JSON.dump(result.to_json)
-        expect(@client.output).to include result_json_string
-        expect(@client2.output).to include result_json_string
+      context 'with a game' do
+        before do
+          @game = Game.new
+          @winner = Player.new('player1')
+          @loser = Player.new('player2')
+          @game.add_player(@winner)
+          @game.add_player(@loser)
+          @server.games << @game
+          @server.clients[@winner] = @server.pending_clients.first
+          @server.clients[@loser] = @server.pending_clients.last
+        end
+
+        it 'sends game round results to clients' do
+          @server.clients[@winner] = @server.pending_clients.first
+          @server.clients[@loser] = @server.pending_clients.last
+          cards_played = {
+                            player1: [PlayingCard.new(rank: 'J', suit: 'H')],
+                            player2: [PlayingCard.new(rank: '2', suit: 'C')]
+                         }
+          result = RoundResult.new(winner: @winner, loser: @loser, cards_played: cards_played)
+          @server.send_round_result_to_clients(@game, result)
+          result_json_string = JSON.dump(result.to_json)
+          expect(@client.output).to include result_json_string
+          expect(@client2.output).to include result_json_string
+        end
       end
 
       # context 'with a game' do

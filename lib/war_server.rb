@@ -19,6 +19,7 @@ class WarServer
   end
 
   def start
+    puts "server started"
     until @socket.closed? do
       Thread.start(accept) do |client|
         run(client)
@@ -38,27 +39,17 @@ class WarServer
   end
 
   def run(client)
-    puts "should be waiting for a game to form ..."
     game = make_game
     if game
-      puts "made a game: #{game}"
-      pair_clients_and_players(game)
+      #pair_clients_and_players(game)
       play_game(game)
       stop_connection(client: @clients[new_game.players.first])
       stop_connection(client: @clients[new_game.players.last])
     end
   end
 
-  def pair_clients_and_players(game)
-    @pending_clients.each_with_index do |client, index|
-      @clients[game.players[index]] = client
-    end
-  end
-
   def make_game
-    puts "pending clients: #{@pending_clients.count} -> #{@pending_clients}"
     if @pending_clients.count == 2
-      puts "got 2 clients"
       player1 = get_player_for_game
       player2 = get_player_for_game
 
@@ -66,25 +57,23 @@ class WarServer
       game.add_player(player1)
       game.add_player(player2)
       games << game
-      puts "added a game"
       game
     end
   end
 
   def get_player_for_game
-    puts "getting player for game"
     client = @pending_clients.shift
-    puts "client is #{client}"
     ask_for_name(client: client[:socket])
     player_name = get_name(client: client[:socket])
-    puts "got the name: #{player_name}"
-    Player.new(player_name)
+    player = Player.new(player_name)
+    @clients[player] = client
+    player
   end
 
   def ask_for_name(client:)
-    puts "asking for name ..."
     payload = { message: "Enter your name:" }
-    client.puts(JSON.dump(payload))
+    ready_to_send = JSON.dump(payload)
+    client.puts(JSON.dump(ready_to_send))
     #send_output_to_clients(payload)
   end
 
@@ -102,31 +91,46 @@ class WarServer
   def play_game(game)
     game.deal
     while !game.over?
-      prompt_clients_for_round
+      prompt_clients_for_round(game)
+      wait_for_client_responses(game)
       result = game.play_round # wait for player input
-      send_result_to_clients(result)
+      send_round_result_to_clients(game, result)
       #congratulate_round_winner(game, result.winner)
     end
     congratulate_game_winner(game) # what is this "result"?
   end
 
-  def prompt_clients_for_rounds
-    #@clients.each do |player,client|
-    #  payload = { message: 'Hit <Enter> to play a card ...' }
-    #  client[:socket].puts JSON.dump(payload)
-    #end
-    payload = { message: 'Hit <Enter> to play a card ...' }
-    send_output_to_clients(payload)
+  def clients_for_game(game)
+    game_clients = []
+    game.players.each do |player|
+      client_for_player = @clients[player]
+      game_clients << client_for_player
+    end
+    game_clients
   end
 
-  def send_output_to_clients(payload)
-    @clients.each do |player,client|
+  def prompt_clients_for_round(game)
+    payload = { message: 'Hit <Enter> to play a card ...' }
+    game_clients = clients_for_game(game)
+    send_output_to_clients(payload, game_clients)
+  end
+
+  def wait_for_client_responses(game)
+    responses = []
+    until responses.count == 2
+      input = receive_input_from_client
+      responses << input
+    end
+  end
+
+  def send_output_to_clients(payload, clients)
+    puts "sending prompt -> #{payload}\nto clients: #{clients}"
+    clients.each do |client|
       client[:socket].puts JSON.dump(payload)
     end
   end
 
   def receive_input_from_client(client)
-    puts "client socket: #{client[:socket]}"
     result = nil
     begin
       result = client[:socket].read_nonblock(1000).chomp
@@ -134,13 +138,16 @@ class WarServer
       IO.select([client[:socket]])
       retry
     end
-    JSON.parse(result, :symbolize_names => true)
+    input = JSON.parse(result, :symbolize_names => true)
+    puts "got this from client: #{input}"
+    input
   end
 
-  def send_result_to_clients(result)
+  def send_round_result_to_clients(game, result)
     #put uniqueid for client in the result?
-    @clients.each do |player,client|
-      client[:socket].puts JSON.dump(result.to_json)
+    game.players.each do |player|
+      client_for_player = @clients[player]
+      client_for_player[:socket].puts JSON.dump(result.to_json)
     end
   end
 

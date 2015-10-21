@@ -44,6 +44,14 @@ describe WarClient do
     expect(result[:input]).to match /\n/
   end
 
+  it 'gets server output and parses' do
+    expected_hash = {message: "Enter your name:"}
+    consume_welcome_message = @client.get_server_output
+    @server.send_output_to_clients(expected_hash, [@server.pending_clients.first])
+    result = @client.get_server_output
+    expect(result).to eq expected_hash
+  end
+
   # client waits for server instructions
   # client hits enter to tell server it's ok to play
   # server waits for BOTH clients to do that

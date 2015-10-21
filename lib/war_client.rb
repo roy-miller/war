@@ -11,7 +11,12 @@ class WarClient
 
   def connect
     @socket = TCPSocket.open(@server_address, @port)
-    #ask_to_play
+  end
+
+  def run
+    ask_to_play
+    puts "my unique id is #{@unique_id}"
+    play_game if @unique_id
   end
 
   def ask_to_play(output=$stdout)
@@ -21,13 +26,17 @@ class WarClient
     output.puts response[:message]
   end
 
+  def get_name
+    get_user_input
+  end
+
   def provide_name(name)
     payload = { input: name }
     @socket.puts JSON.dump(payload)
   end
 
   def play_next_round
-    payload = { input: "\n" }
+    payload = { input: "#{unique_id}\n" }
     @socket.puts JSON.dump(payload)
   end
 
@@ -35,12 +44,20 @@ class WarClient
     while response = get_server_output
       puts "got some server output"
       output.puts response
-      puts "waiting for user input"
-      while input = get_user_input
-        puts "got user input: #{input}"
-        @socket.puts input
+      if response[:message] =~ /OVER/
+        disconnect
+      else
+        puts "waiting for user input"
+        while input = get_user_input
+          puts "got user input: #{input}"
+          play_next_round
+        end
       end
     end
+  end
+
+  def disconnect
+    @socket.close
   end
 
   def get_user_input
@@ -55,9 +72,10 @@ class WarClient
       IO.select([@socket])
       retry
     end
+    puts "response_json_string is #{response_json_string}"
     response_hash = JSON.parse(response_json_string, :symbolize_names => true)
+    puts "response_hash is #{response_hash}"
     response_hash
-    #response_json_string
   end
 
 end

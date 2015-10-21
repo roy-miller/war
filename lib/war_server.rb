@@ -33,12 +33,15 @@ class WarServer
     response = JSON.dump({ unique_id: @next_unique_id,
                            message: 'Welcome to war! Connecting you with a partner' })
     client_socket.puts response
+    puts "added client with id #{@next_unique_id}"
     @next_unique_id += 1
   end
 
   def run(client)
+    puts "should be waiting for a game to form ..."
     game = make_game
     if game
+      puts "made a game: #{game}"
       pair_clients_and_players(game)
       play_game(game)
       stop_connection(client: @clients[new_game.players.first])
@@ -53,7 +56,9 @@ class WarServer
   end
 
   def make_game
+    puts "pending clients: #{@pending_clients.count} -> #{@pending_clients}"
     if @pending_clients.count == 2
+      puts "got 2 clients"
       player1 = get_player_for_game
       player2 = get_player_for_game
 
@@ -61,28 +66,37 @@ class WarServer
       game.add_player(player1)
       game.add_player(player2)
       games << game
+      puts "added a game"
       game
     end
   end
 
   def get_player_for_game
+    puts "getting player for game"
     client = @pending_clients.shift
+    puts "client is #{client}"
     ask_for_name(client: client[:socket])
     player_name = get_name(client: client[:socket])
+    puts "got the name: #{player_name}"
     Player.new(player_name)
   end
 
   def ask_for_name(client:)
-    client.puts("Enter your name:")
+    puts "asking for name ..."
+    payload = { message: "Enter your name:" }
+    client.puts(JSON.dump(payload))
+    #send_output_to_clients(payload)
   end
 
   def get_name(client:)
+    result = nil
     begin
-      client.read_nonblock(1000).chomp
+      result = client.read_nonblock(1000).chomp
     rescue IO::WaitReadable
       IO.select([client])
       retry
     end
+    result
   end
 
   def play_game(game)
@@ -96,10 +110,31 @@ class WarServer
     congratulate_game_winner(game) # what is this "result"?
   end
 
-  def prompt_clients_for_round
-    @clients.each do |client|
-      client[:socket].puts 'Hit <Enter> to play a card ...'
+  def prompt_clients_for_rounds
+    #@clients.each do |player,client|
+    #  payload = { message: 'Hit <Enter> to play a card ...' }
+    #  client[:socket].puts JSON.dump(payload)
+    #end
+    payload = { message: 'Hit <Enter> to play a card ...' }
+    send_output_to_clients(payload)
+  end
+
+  def send_output_to_clients(payload)
+    @clients.each do |player,client|
+      client[:socket].puts JSON.dump(payload)
     end
+  end
+
+  def receive_input_from_client(client)
+    puts "client socket: #{client[:socket]}"
+    result = nil
+    begin
+      result = client[:socket].read_nonblock(1000).chomp
+    rescue IO::WaitReadable
+      IO.select([client[:socket]])
+      retry
+    end
+    JSON.parse(result, :symbolize_names => true)
   end
 
   def send_result_to_clients(result)
@@ -109,28 +144,10 @@ class WarServer
     end
   end
 
-  # def congratulate_round_winner(game, winner)
-  #   if game.player1 == winner
-  #     @clients[game.player1][:socket].puts "You won the round!"
-  #     @clients[game.player2][:socket].puts "You lost the round"
-  #   elsif game.player2 == winner
-  #     @clients[game.player2][:socket].puts "You won the round!"
-  #     @clients[game.player1][:socket].puts "You lost the round"
-  #   end
-  # end
-  #
-  # def congratulate_game_winner(game)
-  #   if game.player1 == game.winner
-  #     @clients[game.player1][:socket].puts "You won the game!"
-  #     @clients[game.player2][:socket].puts "You lost the game"
-  #   elsif game.player2 == game.winner
-  #     @clients[game.player2][:socket].puts "You won the game!"
-  #     @clients[game.player1][:socket].puts "You lost the game"
-  #   end
-  # end
-
   def stop
-    @clients.each { |key,value| stop_connection(client: value) }
+    @clients.each do |player, client|
+      stop_connection(client: client)
+    end
     @socket.close unless @socket.closed?
   end
 
@@ -139,22 +156,3 @@ class WarServer
     client[:socket].close unless client[:socket].closed?
   end
 end
-
-# begin
-#   while input = client.read_nonblock(1000)
-#     ask_for_name(client: client)
-#     get_name(client: client)
-#     save the name and socket together somehow
-#     if there aren't two, tell him to wait (how does this work with threads?)
-#     if there are two, start game and tell him who he's playing
-#     if @pending_clients.length > 1
-#       @clients << @pending_clients.shift
-#       @clients << client
-#       play_game(@clients.first, @clients.last)
-#     else
-#       @pending_clients << client
-#     end
-#   end
-# rescue IO::WaitReadable
-#   retry
-# end

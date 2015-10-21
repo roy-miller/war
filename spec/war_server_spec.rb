@@ -30,7 +30,6 @@ describe WarServer do
     end
 
     it 'gets name from player' do
-      @client.provide_input('player1')
       result = @server.get_name(client: @server.pending_clients.first[:socket])
       expect(result).to eq 'player1'
     end

@@ -7,10 +7,10 @@ describe RoundResult do
       player1 = Player.new('player1')
       player2 = Player.new('player2')
       cards_played = {}
-      cards_played['player1'] = [PlayingCard.new(rank: 'Q', suit: 'H'),
+      cards_played[:player1] = [PlayingCard.new(rank: 'Q', suit: 'H'),
                                  PlayingCard.new(rank: '6', suit: 'C'),
                                  PlayingCard.new(rank: 'A', suit: 'S')]
-      cards_played['player2'] = [PlayingCard.new(rank: 'Q', suit: 'D'),
+      cards_played[:player2] = [PlayingCard.new(rank: 'Q', suit: 'D'),
                                  PlayingCard.new(rank: '2', suit: 'S'),
                                  PlayingCard.new(rank: '7', suit: 'C')]
       RoundResult.new(winner: Player.new('winner'),
@@ -37,7 +37,8 @@ describe RoundResult do
                             :player2 => ['QD','2S','7C']
                           }
                         }
-        expect(result.to_json).to eq expected_json
+        actual_json = result.to_json
+        expect(actual_json).to eq expected_json
       end
     end
   end

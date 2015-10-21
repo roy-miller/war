@@ -36,7 +36,7 @@ class WarClient
   end
 
   def play_next_round
-    payload = { input: "#{unique_id}\n" }
+    payload = { id: "#{unique_id}", input: "\n" }
     @socket.puts JSON.dump(payload)
   end
 

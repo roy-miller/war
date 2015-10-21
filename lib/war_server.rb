@@ -51,21 +51,32 @@ class WarServer
       player1 = get_player_for_game
       player2 = get_player_for_game
 
-      game = Game.new
-      game.add_player(player1)
-      game.add_player(player2)
-      games << game
-      game
+      if player1 && player2
+        game = Game.new
+        game.add_player(player1)
+        game.add_player(player2)
+        games << game
+        return game
+      end
     end
   end
 
   def get_player_for_game
     client = @pending_clients.shift
     ask_for_name(client: client[:socket])
-    player_name = get_name(client: client[:socket])
-    player = Player.new(player_name)
-    @clients[player] = client
-    player
+    #player_name = get_name(client: client[:socket])
+    player_name_payload = receive_input_from_client(client)
+    puts "client sent: #{player_name_payload}"
+    if (player_name_payload[:id])
+      player_name = player_name_payload[:input]
+      player = Player.new(player_name)
+      @clients[player] = client
+      return player
+    else
+      tell_client_is_unauthorized(client)
+      client[:socket].close
+      return nil
+    end
   end
 
   def ask_for_name(client:)
@@ -73,17 +84,6 @@ class WarServer
     ready_to_send = JSON.dump(payload)
     client.puts(JSON.dump(ready_to_send))
     #send_output_to_clients(payload)
-  end
-
-  def get_name(client:)
-    result = nil
-    begin
-      result = client.read_nonblock(1000).chomp
-    rescue IO::WaitReadable
-      IO.select([client])
-      retry
-    end
-    result
   end
 
   def play_game(game)
@@ -109,16 +109,25 @@ class WarServer
 
   def prompt_clients_for_round(game)
     payload = { message: 'Hit <Enter> to play a card ...' }
-    game_clients = clients_for_game(game)
-    send_output_to_clients(payload, game_clients)
+    clients = clients_for_game(game)
+    send_output_to_clients(payload, clients)
   end
 
   def wait_for_client_responses(game)
     responses = []
     until responses.count == 2
       input = receive_input_from_client
-      responses << input
+      if input[:id]
+        responses << input
+      else
+        tell_client_is_unauthorized(game)
+      end
     end
+  end
+
+  def tell_client_is_unauthorized(client)
+    payload = { message: "You are not allowed to play" }
+    send_output_to_clients(payload, [client])
   end
 
   def send_output_to_clients(payload, clients)

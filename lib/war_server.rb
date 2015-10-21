@@ -34,7 +34,6 @@ class WarServer
     response = JSON.dump({ unique_id: @next_unique_id,
                            message: 'Welcome to war! Connecting you with a partner' })
     client_socket.puts response
-    puts "added client with id #{@next_unique_id}"
     @next_unique_id += 1
   end
 
@@ -124,7 +123,6 @@ class WarServer
   end
 
   def send_output_to_clients(payload, clients)
-    puts "sending prompt -> #{payload}\nto clients: #{clients}"
     clients.each do |client|
       client[:socket].puts JSON.dump(payload)
     end
@@ -139,7 +137,6 @@ class WarServer
       retry
     end
     input = JSON.parse(result, :symbolize_names => true)
-    puts "got this from client: #{input}"
     input
   end
 

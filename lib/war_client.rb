@@ -42,14 +42,11 @@ class WarClient
 
   def play_game(output=$stdout)
     while response = get_server_output
-      puts "got some server output"
       output.puts response
       if response[:message] =~ /OVER/
         disconnect
       else
-        puts "waiting for user input"
         while input = get_user_input
-          puts "got user input: #{input}"
           play_next_round
         end
       end
@@ -72,9 +69,7 @@ class WarClient
       IO.select([@socket])
       retry
     end
-    puts "response_json_string is #{response_json_string}"
     response_hash = JSON.parse(response_json_string, :symbolize_names => true)
-    puts "response_hash is #{response_hash}"
     response_hash
   end
 

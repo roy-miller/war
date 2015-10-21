@@ -40,7 +40,6 @@ class WarServer
   def run(client)
     game = make_game
     if game
-      #pair_clients_and_players(game)
       play_game(game)
       stop_connection(client: @clients[new_game.players.first])
       stop_connection(client: @clients[new_game.players.last])

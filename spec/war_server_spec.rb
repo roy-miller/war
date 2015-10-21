@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'war_server'
 require 'mock_war_socket_client'
+require 'json'
 
 describe WarServer do
 
@@ -10,6 +11,7 @@ describe WarServer do
       @client = MockWarSocketClient.new
       @client.start
       @server.accept
+      @client.output # consume welcome message
       @client.provide_input('player1')
     end
 
@@ -43,6 +45,7 @@ describe WarServer do
         @client2 = MockWarSocketClient.new
         @client2.start
         @server.accept
+        @client2.output # consume welcome message
         @client2.provide_input('player2')
       end
 
@@ -54,48 +57,64 @@ describe WarServer do
         expect(@server.pending_clients.count).to eq 0
       end
 
-      context 'with a game' do
-        before do
-          @game = Game.new
-          @player1 = Player.new('player1')
-          @player2 = Player.new('player2')
-          @game.add_player(@player1)
-          @game.add_player(@player2)
-          @server.games << @game
-          @server.clients[@player1] = @server.pending_clients.first
-          @server.clients[@player2] = @server.pending_clients.last
-        end
-
-        it 'congratulates player1 when he wins a round' do
-          @server.congratulate_round_winner(@game, @player1)
-          expect(@client.output).to match /You won/
-          expect(@client2.output).to match /You lost/
-        end
-
-        it 'congratulates player2 when he wins a round' do
-          @server.congratulate_round_winner(@game, @player2)
-          expect(@client.output).to match /You lost/
-          expect(@client2.output).to match /You won/
-        end
-
-        it 'congratulates player2 when he wins a game' do
-          @game.winner = @player2
-          @server.congratulate_game_winner(@game)
-          expect(@client.output).to match /You lost/
-          expect(@client2.output).to match /You won/
-        end
+      it 'sends game round results to clients' do
+        winner = Player.new('player1')
+        loser = Player.new('player2')
+        @server.clients[winner] = @server.pending_clients.first
+        @server.clients[loser] = @server.pending_clients.last
+        cards_played = {
+                          player1: [PlayingCard.new(rank: 'J', suit: 'H')],
+                          player2: [PlayingCard.new(rank: '2', suit: 'C')]
+                       }
+        result = RoundResult.new(winner: winner, loser: loser, cards_played: cards_played)
+        @server.send_result_to_clients(result)
+        result_json_string = JSON.dump(result.to_json)
+        expect(@client.output).to include result_json_string
+        expect(@client2.output).to include result_json_string
       end
 
-      it 'allows multiple simultaneous games' do
-        existing_player1 = Player.new('player1')
-        existing_player2 = Player.new('player2')
-        existing_game = Game.new
-        existing_game.add_player(existing_player1)
-        existing_game.add_player(existing_player2)
-        @server.games << existing_game
-        @server.make_game
-        expect(@server.games.count).to eq 2
-      end
+      # context 'with a game' do
+      #   before do
+      #     @game = Game.new
+      #     @player1 = Player.new('player1')
+      #     @player2 = Player.new('player2')
+      #     @game.add_player(@player1)
+      #     @game.add_player(@player2)
+      #     @server.games << @game
+      #     @server.clients[@player1] = @server.pending_clients.first
+      #     @server.clients[@player2] = @server.pending_clients.last
+      #   end
+      #
+      #   it 'congratulates player1 when he wins a round' do
+      #     @server.congratulate_round_winner(@game, @player1)
+      #     expect(@client.output).to match /You won/
+      #     expect(@client2.output).to match /You lost/
+      #   end
+      #
+      #   it 'congratulates player2 when he wins a round' do
+      #     @server.congratulate_round_winner(@game, @player2)
+      #     expect(@client.output).to match /You lost/
+      #     expect(@client2.output).to match /You won/
+      #   end
+      #
+      #   it 'congratulates player2 when he wins a game' do
+      #     @game.winner = @player2
+      #     @server.congratulate_game_winner(@game)
+      #     expect(@client.output).to match /You lost/
+      #     expect(@client2.output).to match /You won/
+      #   end
+      # end
+
+      # it 'allows multiple simultaneous games' do
+      #   existing_player1 = Player.new('player1')
+      #   existing_player2 = Player.new('player2')
+      #   existing_game = Game.new
+      #   existing_game.add_player(existing_player1)
+      #   existing_game.add_player(existing_player2)
+      #   @server.games << existing_game
+      #   @server.make_game
+      #   expect(@server.games.count).to eq 2
+      # end
     end
   end
 end

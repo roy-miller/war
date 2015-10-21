@@ -13,8 +13,20 @@ class WarClient
     @socket = TCPSocket.open(@server_address, @port)
   end
 
-  def ask_to_play
-    response = nil
+  def ask_to_play(output=$stdout)
+    response = receive
+    @unique_id = response[:unique_id]
+    output.puts response[:message]
+  end
+
+  def play_game(output=$stdout)
+    #while (response = receive)
+    #response = receive
+
+  end
+
+  def receive
+    response_json_string = nil
     begin
       response_json_string = @socket.read_nonblock(1000).chomp
     rescue IO::WaitReadable
@@ -22,7 +34,7 @@ class WarClient
       retry
     end
     response_hash = JSON.parse(response_json_string, :symbolize_names => true)
-    @unique_id = response_hash[:unique_id]
+    response_hash
   end
 
 end

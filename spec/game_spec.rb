@@ -63,6 +63,7 @@ describe Game do
           game.players.last.hand = [lower_rank_card]
           result = game.play_round
           expect(result.winner).to eq player1
+          expect(result.loser).to eq player2
           expect(result.cards_played[:player1]).to match_array([higher_rank_card])
           expect(result.cards_played[:player2]).to match_array([lower_rank_card])
           expect(game.players.first.hand).to include(higher_rank_card, lower_rank_card)
@@ -74,6 +75,7 @@ describe Game do
           game.players.last.hand = [higher_rank_card]
           result = game.play_round
           expect(result.winner).to eq player2
+          expect(result.loser).to eq player1
           expect(result.cards_played[:player1]).to match_array([lower_rank_card])
           expect(result.cards_played[:player2]).to match_array([higher_rank_card])
           expect(game.players.last.hand).to include(higher_rank_card, lower_rank_card)
@@ -93,6 +95,7 @@ describe Game do
           result = game.play_round
 
           expect(result.winner).to eq game.players.first
+          expect(result.loser).to eq game.players.last
           expect(result.cards_played[:player1]).to match_array([card1,card2,card3])
           expect(result.cards_played[:player2]).to match_array([card4,card5,card6])
           expect(game.players.first.hand).to include(card1, card2, card3, card4, card5, card6)
@@ -115,6 +118,7 @@ describe Game do
         result = game.play_round
 
         expect(result.winner).to eq game.players.last
+        expect(result.loser).to eq game.players.first
         expect(result.cards_played[:player1]).to match_array([card1,card2,card3,card4,card5])
         expect(result.cards_played[:player2]).to match_array([card6,card7,card8,card9,card10])
         expect(game.players.last.hand).to include(card1, card2, card3, card4, card5,
@@ -123,13 +127,13 @@ describe Game do
       it 'does not play if the game is over' do
         game.players.first.hand = [PlayingCard.new(rank: '6', suit: 'H')]
         game.players.last.hand = []
-        winner = game.play_round
-        expect(winner).to be game.player1
+        result = game.play_round
+        expect(result.winner).to be game.player1
 
         game.players.first.hand = []
         game.players.last.hand = [PlayingCard.new(rank: '6', suit: 'H')]
-        winner = game.play_round
-        expect(winner).to be game.player2
+        result = game.play_round
+        expect(result.winner).to be game.player2
       end
     end
 
@@ -153,13 +157,17 @@ describe Game do
       it 'declares player1 the winner when player2 is out of cards' do
         game.player1.hand = [PlayingCard.new(rank: 'K', suit: 'C')]
         game.player2.hand = []
-        expect(game.declare_game_winner).to be player1
+        winner, loser = game.declare_game_winner
+        expect(winner).to be player1
+        expect(loser).to be player2
       end
 
       it 'declares player2 the winner when player1 is out of cards' do
         game.player1.hand = []
         game.player2.hand = [PlayingCard.new(rank: 'K', suit: 'C')]
-        expect(game.declare_game_winner).to be player2
+        winner, loser = game.declare_game_winner
+        expect(winner).to be player2
+        expect(loser).to be player1
       end
     end
   end

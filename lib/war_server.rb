@@ -88,31 +88,46 @@ class WarServer
   def play_game(game)
     game.deal
     while !game.over?
+      prompt_clients_for_round
       result = game.play_round # wait for player input
-      congratulate_round_winner(game, result.winner)
+      send_result_to_clients(result)
+      #congratulate_round_winner(game, result.winner)
     end
-    congratulate_game_winner(game)
+    congratulate_game_winner(game) # what is this "result"?
   end
 
-  def congratulate_round_winner(game, winner)
-    if game.player1 == winner
-      @clients[game.player1][:socket].puts "You won the round!"
-      @clients[game.player2][:socket].puts "You lost the round"
-    elsif game.player2 == winner
-      @clients[game.player2][:socket].puts "You won the round!"
-      @clients[game.player1][:socket].puts "You lost the round"
+  def prompt_clients_for_round
+    @clients.each do |client|
+      client[:socket].puts 'Hit <Enter> to play a card ...'
     end
   end
 
-  def congratulate_game_winner(game)
-    if game.player1 == game.winner
-      @clients[game.player1][:socket].puts "You won the game!"
-      @clients[game.player2][:socket].puts "You lost the game"
-    elsif game.player2 == game.winner
-      @clients[game.player2][:socket].puts "You won the game!"
-      @clients[game.player1][:socket].puts "You lost the game"
+  def send_result_to_clients(result)
+    #put uniqueid for client in the result?
+    @clients.each do |player,client|
+      client[:socket].puts JSON.dump(result.to_json)
     end
   end
+
+  # def congratulate_round_winner(game, winner)
+  #   if game.player1 == winner
+  #     @clients[game.player1][:socket].puts "You won the round!"
+  #     @clients[game.player2][:socket].puts "You lost the round"
+  #   elsif game.player2 == winner
+  #     @clients[game.player2][:socket].puts "You won the round!"
+  #     @clients[game.player1][:socket].puts "You lost the round"
+  #   end
+  # end
+  #
+  # def congratulate_game_winner(game)
+  #   if game.player1 == game.winner
+  #     @clients[game.player1][:socket].puts "You won the game!"
+  #     @clients[game.player2][:socket].puts "You lost the game"
+  #   elsif game.player2 == game.winner
+  #     @clients[game.player2][:socket].puts "You won the game!"
+  #     @clients[game.player1][:socket].puts "You lost the game"
+  #   end
+  # end
 
   def stop
     @clients.each { |key,value| stop_connection(client: value) }

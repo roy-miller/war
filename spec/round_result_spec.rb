@@ -13,7 +13,9 @@ describe RoundResult do
       cards_played['player2'] = [PlayingCard.new(rank: 'Q', suit: 'D'),
                                  PlayingCard.new(rank: '2', suit: 'S'),
                                  PlayingCard.new(rank: '7', suit: 'C')]
-      RoundResult.new(winner: Player.new('winner'), cards_played: cards_played)
+      RoundResult.new(winner: Player.new('winner'),
+                      loser: Player.new('loser'),
+                      cards_played: cards_played)
     end
 
     describe '#had_winner' do
@@ -29,6 +31,7 @@ describe RoundResult do
     describe '#to_json' do
       it 'returns JSON for result' do
         expected_json = { :winner => 'winner',
+                          :loser => 'loser',
                           :cards_played => {
                             :player1 => ['QH','6C','AS'],
                             :player2 => ['QD','2S','7C']

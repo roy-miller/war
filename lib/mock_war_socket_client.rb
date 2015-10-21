@@ -1,7 +1,7 @@
 require 'socket'
 
 class MockWarSocketClient
-  attr_reader :socket
+  attr_reader :socket, :captured_output
 
   def initialize(port: 2000)
     @port = port
@@ -18,7 +18,6 @@ class MockWarSocketClient
   def capture_output(delay=0.1)
     sleep(delay)
     @captured_output = @socket.read_nonblock(1000)
-    #@output = @socket.gets
   rescue IO::WaitReadable
     @captured_output = ""
     retry
